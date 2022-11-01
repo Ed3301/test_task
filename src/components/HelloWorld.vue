@@ -6,15 +6,17 @@
     >
       <v-card class="dialog">
         <v-text-field
-            v-model="new_config_label"
+            v-model="newConfigLabel"
             label="Name of the new configuration"
-            required
         ></v-text-field>
         <v-btn @click="addNewConfig">
           Ok
         </v-btn>
       </v-card>
     </v-dialog>
+    <v-snackbar v-model="snackbar" :timeout="2000">
+      Please fill of the fields
+    </v-snackbar>
     <template>
       <v-expansion-panels>
         <v-expansion-panel
@@ -38,61 +40,47 @@
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <v-text-field
-                v-model="new_spec.name"
+                v-model="newSpec.name"
                 label="Name of specification"
-                required
             ></v-text-field>
             <v-select
-                v-model="new_spec.engine"
+                v-model="newSpec.engine"
                 :items="engines"
-                :rules="[v => !!v || 'Item is required']"
                 label="Engine"
-                required
             ></v-select>
             <v-select
-                v-model="new_spec.interior"
+                v-model="newSpec.interior"
                 :items="interiors"
-                :rules="[v => !!v || 'Item is required']"
                 label="Interior materials"
-                required
             ></v-select>
             <v-select
-                v-model="new_spec.color"
+                v-model="newSpec.color"
                 :items="colors"
-                :rules="[v => !!v || 'Item is required']"
                 label="Color"
-                required
             ></v-select>
             <v-select
-                v-model="new_spec.wheel_rims"
+                v-model="newSpec.wheelRims"
                 :items="rims"
-                :rules="[v => !!v || 'Item is required']"
                 label="Wheel rims"
-                required
             ></v-select>
             <v-select
-                v-model="new_spec.wheel_type"
-                :items="wheel_types"
-                :rules="[v => !!v || 'Item is required']"
+                v-model="newSpec.wheelType"
+                :items="wheelTypes"
                 label="Wheel type"
-                required
             ></v-select>
             <v-checkbox
-                v-model="new_spec.air_suspension"
+                v-model="newSpec.airSuspension"
                 label="Air suspension"
-                required
             ></v-checkbox>
             <v-text-field
-                v-model="new_spec.signature"
+                v-model="newSpec.signature"
                 label="Signature on hood"
-                required
             ></v-text-field>
             <v-text-field
-                v-for="(config, i) in new_configs"
+                v-for="(config, i) in newConfigs"
                 v-model="config.value"
                 :key="i"
                 :label="config.label"
-                required
             ></v-text-field>
             <v-card class="button-container d-flex flex-row justify-space-around">
               <v-btn @click="dialog = true">
@@ -119,16 +107,17 @@ export default {
   data: () => (
       {
         dialog: false,
-        new_config_label: '',
+        snackbar: false,
+        newConfigLabel: '',
         specifications: [
           {
             name: 'Sport',
             engine: 'v6, petrol',
             interior: 'Seats - leather',
             color: 'white',
-            wheel_rims: '15 inches',
-            wheel_type: 'type 3',
-            air_suspension: false,
+            wheelRims: '15 inches',
+            wheelType: 'type 3',
+            airSuspension: false,
             signature: '',
           },
           {
@@ -136,9 +125,9 @@ export default {
             engine: 'v6, petrol',
             interior: 'Seats - leather',
             color: 'white',
-            wheel_rims: '15 inches',
-            wheel_type: 'type 3',
-            air_suspension: false,
+            wheelRims: '15 inches',
+            wheelType: 'type 3',
+            airSuspension: false,
             signature: '',
           },
           {
@@ -146,9 +135,9 @@ export default {
             engine: 'v6, petrol',
             interior: 'Seats - leather',
             color: 'white',
-            wheel_rims: '15 inches',
-            wheel_type: 'type 3',
-            air_suspension: false,
+            wheelRims: '15 inches',
+            wheelType: 'type 3',
+            airSuspension: false,
             signature: '',
           },
           {
@@ -156,9 +145,9 @@ export default {
             engine: 'v6, petrol',
             interior: 'Seats - leather',
             color: 'white',
-            wheel_rims: '15 inches',
-            wheel_type: 'type 3',
-            air_suspension: false,
+            wheelRims: '15 inches',
+            wheelType: 'type 3',
+            airSuspension: false,
             signature: '',
           }
         ],
@@ -183,44 +172,53 @@ export default {
           '13 inches',
           '11 inches'
         ],
-        wheel_types: [
+        wheelTypes: [
           'type 1',
           'type 2',
           'type 3'
         ],
-        new_spec: {
+        newSpec: {
           name: '',
           engine: '',
           interior: '',
           color: '',
-          wheel_rims: '',
-          wheel_type: '',
-          air_suspension: false,
+          wheelRims: '',
+          wheelType: '',
+          airSuspension: false,
           signature: '',
         },
-        new_configs: []
+        newConfigs: []
       }
   ),
   methods: {
     saveSpecification: function () {
-      for(let config of this.new_configs) {
-        this.new_spec[config.label] = config.value;
+      for(const config of this.newConfigs) {
+        this.newSpec[config.label] = config.value;
       }
-      this.specifications.push(this.new_spec);
-      this.new_configs = [];
-      this.new_spec = {
+      const empty = Object.values(this.newSpec).filter(val => {
+        return typeof val != 'boolean' && !val;
+      });
+
+      if (empty.length) {
+        this.snackbar = true;
+        return;
+      }
+
+      this.specifications.push(this.newSpec);
+      this.newConfigs = [];
+      this.newSpec = {
         name: '',
         engine: '',
         interior: '',
         color: '',
-        wheel_rims: '',
-        wheel_type: '',
-        air_suspension: false,
+        wheelRims: '',
+        wheelType: '',
+        airSuspension: false,
         signature: '',
       };
     },
     addNewConfig: function () {
-      this.new_configs.push({label: this.new_config_label, value: ''});
+      this.newConfigs.push({label: this.newConfigLabel, value: ''});
       this.dialog = false;
     }
   }
