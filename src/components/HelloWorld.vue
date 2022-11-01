@@ -93,13 +93,30 @@
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
-
     </template>
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue';
+
+declare interface newSpecType {
+  name: string,
+  engine: string,
+  interior: string,
+  color: string,
+  wheelRims: string,
+  wheelType: string,
+  airSuspension: boolean,
+  signature: string,
+}
+
+declare interface newConfigsType {
+  label: string,
+  value: string,
+}
+
+export default Vue.extend({
   name: 'HelloWorld',
   props: {
     msg: String
@@ -177,22 +194,14 @@ export default {
           'type 2',
           'type 3'
         ],
-        newSpec: {
-          name: '',
-          engine: '',
-          interior: '',
-          color: '',
-          wheelRims: '',
-          wheelType: '',
-          airSuspension: false,
-          signature: '',
-        },
-        newConfigs: []
+        newSpec: {} as newSpecType,
+        newConfigs: [] as newConfigsType[]
       }
   ),
   methods: {
     saveSpecification: function () {
       for(const config of this.newConfigs) {
+        // @ts-expect-error: Unreachable code error
         this.newSpec[config.label] = config.value;
       }
       const empty = Object.values(this.newSpec).filter(val => {
@@ -222,11 +231,11 @@ export default {
       this.dialog = false;
     }
   }
-}
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
 h3 {
   margin: 40px 0 0;
 }
